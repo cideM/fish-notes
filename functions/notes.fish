@@ -15,8 +15,6 @@ set __notes_date_format "%Y-%m-%d %T"
 set -q __notes_entry_template
 or set __notes_entry_template (\
 function __notes_entry_template
-    echo "Title: "
-    echo "Tags: "
     echo ""
 end)
 
@@ -35,7 +33,7 @@ function __notes_dir_name
     echo $FISH_NOTES_DIR/(random 100000 1000000)
 end
 
-function notes
+function __notes_new
     if not set -q EDITOR
         echo "Please set $EDITOR variable"
         return 1
@@ -49,6 +47,16 @@ function notes
 
     if test \( -d "$FISH_NOTES_DIR" \) -a \( -f "$FISH_NOTES_DIR" \)
         echo "$FISH_NOTES_DIR is a file, exiting"
+        return 1
+    end
+
+    set -l options \
+        (fish_opt -s t -l tags -r --multiple-vals) \
+        (fish_opt -s T -l title -r)
+
+    argparse $options -- $argv
+    if not argparse -i $options -- $argv
+        echo "failed to parse arguments" 1>&2
         return 1
     end
 
@@ -69,6 +77,7 @@ function notes
     set -l tmpfile (mktemp $TMPDIR/"fish_notes_XXXX"$FISH_NOTES_EXTENSION)
     echo $template >"$tmpfile"
 
+    # Ask user for note
     $EDITOR "$tmpfile"
 
     # Check if files are different, meaning, check
@@ -79,19 +88,92 @@ function notes
         return 0
     end
 
-    # Each line has meaning:
-    # 1. Title (after "Title: ")
-    # 2. Tags (after "Tags: ")
-    # 3. Empty line
-    # 4. This line including all others are content of note
-    set -l title (sed -n '1p' $tmpfile | sed 's/^Title: //')
-    set -l tags (sed -n '2p' $tmpfile | sed 's/^Tags: //')
-    set -l body (sed -n '4,$p' $tmpfile | string collect)
+    # Store title
+    touch "$entry_dir"/title
+    if set -q _flag_T
+        echo "$_flag_T" >"$entry_dir"/title
+    else
+        touch "$entry_dir"/title
+    end
 
+    # Store tags
+    touch "$entry_dir"/tags
+    if set -q _flag_t
+        for tag in $_flag_t
+            echo 'STORE TAG'
+            echo "$tag" >>"$entry_dir"/tags
+        end
+    else
+        touch "$entry_dir"/tags
+    end
+
+    # Store date
     __notes_date_lexicographic (date) >$entry_dir/date
-    echo "$title" >"$entry_dir"/title
-    echo "$tags"  >"$entry_dir"/tags
-    echo "$body"  >"$entry_dir"/body$FISH_NOTES_EXTENSION
+
+    # Store post
+    cat "$tmpfile"  >"$entry_dir"/body$FISH_NOTES_EXTENSION
 
     echo "Created new note '$entry_dir'"
+end
+
+function __notes_list_tags
+    cat $FISH_NOTES_DIR/*/tags \
+    | sed '/^$/d'                \
+    | string join " "            \
+    | string split " "           \
+    | sort                       \
+    | uniq
+end
+
+function __notes_list_titles
+    cat $FISH_NOTES_DIR/*/title\
+    | sed '/^$/d'                \
+    | sort                       \
+    | uniq
+end
+
+function notes -a cmd -d "Fish Notes"
+    set -l options \
+        (fish_opt -s h -l help)
+
+    argparse -i $options -- $argv
+    if not argparse -i $options -- $argv
+        echo "failed to parse arguments" 1>&2
+        return 1
+    end
+
+    switch "$cmd"
+        case tags
+            __notes_list_tags
+        case titles
+            __notes_list_titles
+        case new
+            # TODO: Add help for new
+            # if set -q _flag_h
+            #     __notes_help_new
+            #     return 0
+            # end
+
+            set -e argv[1]
+            __notes_new $argv
+        case \*
+            set -e argv[1]
+            __notes_help
+    end
+end
+
+function __notes_help
+    echo 'Usage:'
+    echo 'notes help/--help/-h     Show this help'
+    echo ''
+    echo 'Customziations:'
+    echo 'You can customize the default template, meaning the text that will be'
+    echo 'shown when $EDITOR is opened. Just override __notes_entry_template, like so:'
+    echo '$ function __notes_entry_template; echo "foo"; end; notes'
+    echo ''
+    echo 'FISH_NOTES_DIR can be used to store the notes in a custom location'
+    echo 'set FISH_NOTES_DIR ~/my_notes; notes new'
+    echo ''
+    echo 'FISH_NOTES_EXTENSION determines the file extension of new entries'
+    echo 'set FISH_NOTES_EXTENSION '.md'; notes new'
 end
