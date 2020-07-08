@@ -100,7 +100,6 @@ function __notes_new
     touch "$entry_dir"/tags
     if set -q _flag_t
         for tag in $_flag_t
-            echo 'STORE TAG'
             echo "$tag" >>"$entry_dir"/tags
         end
     else
