@@ -86,7 +86,7 @@ function notes
     # 4. This line including all others are content of note
     set -l title (sed -n '1p' $tmpfile | sed 's/^Title: //')
     set -l tags (sed -n '2p' $tmpfile | sed 's/^Tags: //')
-    set -l body (sed -n '4,$p' $tmpfile)
+    set -l body (sed -n '4,$p' $tmpfile | string collect)
 
     __notes_date_lexicographic (date) >$entry_dir/date
     echo "$title" >"$entry_dir"/title
