@@ -20,7 +20,7 @@ function __handle_results
 end
 
 function __notes_by_title
-    rg --files-with-matches -S $argv[1] $FISH_NOTES_DIR/*/title | __handle_results
+    grep --files-with-matches -i $argv[1] $FISH_NOTES_DIR/*/title | __handle_results
 end
 
 function __notes_by_tags
@@ -41,12 +41,12 @@ end
 
 # Requires a note with title #TODO#
 function __notes_todo
-    $EDITOR (dirname (rg --files-with-matches -wF '#TODO#' $FISH_NOTES_DIR/*/title))/body*
+    $EDITOR (dirname (grep --files-with-matches -wF '#TODO#' $FISH_NOTES_DIR/*/title))/body*
 end
 
 # Requires a note with title #TODO#
 function __notes_todo_work
-    $EDITOR (dirname (rg --files-with-matches -wF '#TODO_WORK#' $FISH_NOTES_DIR/*/title))/body*
+    $EDITOR (dirname (grep --files-with-matches -wF '#TODO_WORK#' $FISH_NOTES_DIR/*/title))/body*
 end
 
 
