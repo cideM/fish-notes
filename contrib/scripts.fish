@@ -1,5 +1,7 @@
 #!/usr/bin/env fish
 
+# The functions in here show how you can search your notes
+
 function __handle_results
     read -la f
 

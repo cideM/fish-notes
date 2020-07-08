@@ -35,7 +35,7 @@ function __notes_dir_name
     echo $FISH_NOTES_DIR/(random 100000 1000000)
 end
 
-function note
+function notes
     if not set -q EDITOR
         echo "Please set $EDITOR variable"
         return 1
