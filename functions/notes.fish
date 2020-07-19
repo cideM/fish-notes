@@ -163,13 +163,13 @@ end
 # Careful with quoting in here, it's easy to overlook that this is a string.
 # Especially single quotes can be tricky.
 set __tags_preview_func_string '\
-    if test (count {2..}) -eq 0
+    if test (count {+1}) -eq 0
         return
     end
 
     set -l tag_results $FISH_NOTES_DIR/*/tags
 
-    for tag in {2..}
+    for tag in {+1}
         set tag_results (rg --files-with-matches $tag $tag_results)
     end
 
@@ -191,19 +191,29 @@ function __notes_by_tags
     end
 
     # Gather all tags and make them sorted and unique
-    set -l tags (rg '.*' $FISH_NOTES_DIR/*/tags | sed '/^$/d' | sort | uniq | string collect)
+    set -l tags (__notes_list_tags | string collect)
 
-    # This stores the filenames that the user chose through FZF
-    set -l results (                                  \
+    # This stores **THE TAGS** that the user chose through FZF.  I don't know
+    # how to make the list of tags unique if I do "rg '.*'".  The advantage of
+    # using rg is that I get the filenames too, and can then hide them in FZF
+    # with "with-nth". Alternatively I can let the user perform tag search
+    # with FZF, and then just run the search again with those tags. As long as
+    # the end result is the same as what was offered in the FZF preview window,
+    # it should be fine.
+    set -l tags (                                  \
          echo $tags | fzf                             \
-                --delimiter ':'                       \
                 --preview $__tags_preview_func_string \
                 --multi                               \
-                --with-nth 2..                        \
                 --preview-window down:wrap            \
     )
 
-    for v in $results
+    set -l tag_results $FISH_NOTES_DIR/*/tags
+
+    for tag in $tags
+        set tag_results (rg --files-with-matches $tag $tag_results)
+    end
+
+    for v in $tag_results
         set -l dir (dirname $v)
 
         printf "%s\n" (string repeat -n 80 "-")
