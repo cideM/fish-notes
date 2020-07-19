@@ -1,4 +1,22 @@
-# Fish Notes :fish:
+# Fish Notes :fish: `0.0.1`
+
+<!-- vim-markdown-toc GFM -->
+
+* [CHANGELOG](#changelog)
+* [Usage](#usage)
+    * [Create Note](#create-note)
+    * [Searching](#searching)
+* [Options](#options)
+* [Disclaimer](#disclaimer)
+
+<!-- vim-markdown-toc -->
+
+## CHANGELOG
+
+- Sun 19 Jul 2020 04:13:49 PM CEST
+    - Add commands for searching notes
+    - Add CHANGELOG to README
+    - Update README with help for `new` and the new search commands
 
 ## Usage
 
@@ -64,4 +82,3 @@ So doing `rg title` will only print titles, and so on.
 ## Disclaimer
 
 I created this primarily for myself. It's therefore quite minimal and requires both Ripgrep and FZF, in case you want to use search. Additionally, I can't guarantee that all features work with all symbols and characters.
-
