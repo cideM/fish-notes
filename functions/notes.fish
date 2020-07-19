@@ -117,17 +117,15 @@ end
 
 function __notes_list_tags
     cat $FISH_NOTES_DIR/*/tags \
-    | sed '/^$/d'                \
-    | string join " "            \
-    | string split " "           \
-    | sort                       \
+    | sed '/^$/d'              \
+    | sort                     \
     | uniq
 end
 
 function __notes_list_titles
-    cat $FISH_NOTES_DIR/*/title\
-    | sed '/^$/d'                \
-    | sort                       \
+    cat $FISH_NOTES_DIR/*/title \
+    | sed '/^$/d'               \
+    | sort                      \
     | uniq
 end
 
