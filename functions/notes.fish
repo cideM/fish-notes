@@ -6,6 +6,7 @@ set -q XDG_DATA_DIR; or set XDG_DATA_DIR "$HOME/.local/share"
 set -q FISH_NOTES_DIR; or set FISH_NOTES_DIR "$XDG_DATA_DIR/fish_notes"
 set -q FISH_NOTES_EXTENSION; or set FISH_NOTES_EXTENSION ".md"
 set -q TMPDIR; or set TMPDIR "/tmp"
+set -g fish_notes_version 0.0.1
 
 # Date format which can be sorted lexicographicically Means you can 
 # sort dates by their character value. 2020 > 2019 then month 05 > 04, 
@@ -215,13 +216,10 @@ function __notes_by_tags
 
     for v in $tag_results
         set -l dir (dirname $v)
-
-        printf "%s\n" (string repeat -n 80 "-")
-
-        printf "Title: %s\n" (cat $dir/title)
-        printf "Tags: %s\n" (string join " " < $dir/tags)
-        printf "Date: %s\n" (cat $dir/date)
-        fold -s $dir/body*
+        echo $dir/title
+        echo $dir/date
+        echo $dir/tags
+        echo $dir/body*
     end
 end
 
@@ -248,13 +246,10 @@ function __notes_by_content
     end
 
     set -l dir (dirname $result)
-
-    printf "%s\n" (string repeat -n 80 "-")
-
-    printf "Title: %s\n" (cat $dir/title)
-    printf "Tags: %s\n" (string join " " < $dir/tags)
-    printf "Date: %s\n" (cat $dir/date)
-    fold -s $dir/body*
+    echo $dir/title
+    echo $dir/date
+    echo $dir/tags
+    echo $dir/body*
 end
 
 function __notes_help

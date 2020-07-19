@@ -27,9 +27,30 @@ fish_notes λ tree
 │   └── title
 ```
 
-### Search Notes
+### Searching
 
-You can search notes by tags and by content with the `notes search_content` and `notes search_tags` commands. Both will spawn a FZF shell where you can interactively narrow down your search.
+You can search notes by tags and by content with the `notes search_content` and `notes search_tags` commands. Both will spawn a FZF shell where you can interactively narrow down your search. **Both commands return file names, not file content**. The idea is that I don't know how you'd like to consume your notes. Maybe you want to pipe them into a pager that has syntax highlighting for certain file extensions. For example, if you stick with the default extension `.md`, you can do:
+
+```shell
+$ notes search_content | rg body | xargs bat
+───────┬────────────────────────────────────────────────────────────────────────
+       │ File: /data/fish_notes/987961/body.md
+───────┼────────────────────────────────────────────────────────────────────────
+   1   │ This is some content for a note
+───────┴────────────────────────────────────────────────────────────────────────
+```
+
+Since `bat` recognizes the `.md` file extension, you'll get syntax highlighting. The `rg` call makes sure that only the note content is displayed. The possible file names that are returned are as follows:
+
+```shell
+$ notes search_content
+/data/fish_notes/987961/title
+/data/fish_notes/987961/date
+/data/fish_notes/987961/tags
+/data/fish_notes/987961/body.md
+```
+
+So doing `rg title` will only print titles, and so on.
 
 ## Options
 
