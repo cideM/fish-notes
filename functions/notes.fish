@@ -245,7 +245,7 @@ function __notes_by_content
         return
     end
 
-    set -l dir (dirname $result)
+    set -l dir (dirname (string split ":" $result)[1])
     echo $dir/title
     echo $dir/date
     echo $dir/tags
