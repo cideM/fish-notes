@@ -1,5 +1,5 @@
 # List all commands, useful for the -n option of the complete function
-set -l commands tags titles new help search_tags search_content
+set -l commands tags titles new help search
 
 # Disable file completion
 complete -c notes -f
@@ -9,8 +9,7 @@ complete -c notes -n "not __fish_seen_subcommand_from $commands" -a "tags" -d "l
 complete -c notes -n "not __fish_seen_subcommand_from $commands" -a "titles" -d "list all titles" 
 complete -c notes -n "not __fish_seen_subcommand_from $commands" -a "new" -d "create a new entry" 
 complete -c notes -n "not __fish_seen_subcommand_from $commands" -a "help" -d "show help and usage" 
-complete -c notes -n "not __fish_seen_subcommand_from $commands" -a "search_content" -d "search notes by content" 
-complete -c notes -n "not __fish_seen_subcommand_from $commands" -a "search_tags" -d "search notes by tags" 
+complete -c notes -n "not __fish_seen_subcommand_from $commands" -a "search" -d "find a single note" 
 
 # Switch/options completion
 complete -c notes -s h -l help            -d "Help"

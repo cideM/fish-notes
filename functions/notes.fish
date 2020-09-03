@@ -148,41 +148,15 @@ function notes -a cmd -d "Fish Notes"
         case new
             set -e argv[1]
             __notes_new $argv
-        case search_content
-            __notes_by_content
-        case search_tags
-            __notes_by_tags
+        case search
+            __search
         case \*
             set -e argv[1]
             __notes_help
     end
 end
 
-# This is the function used for the --preview argument when previewing tag
-# search results. See 'man fzf' for details, but here's a quick summary:
-# > Use {+n} if you want all index numbers when multiple lines are selected
-# Careful with quoting in here, it's easy to overlook that this is a string.
-# Especially single quotes can be tricky.
-set __tags_preview_func_string '\
-    if test (count {+1}) -eq 0
-        return
-    end
-
-    set -l tag_results $FISH_NOTES_DIR/*/tags
-
-    for tag in {+1}
-        set tag_results (rg --files-with-matches $tag $tag_results)
-    end
-
-    for r in $tag_results
-        set -l dn (dirname $r)
-        printf "Title: %s\n" (cat $dn/title)
-        printf "Tags: %s\n" (cat $dn/tags | string join " ")
-        cat $dn/body*
-    end\
-'
-
-function __notes_by_tags
+function __search
     if not type -q rg
         echo 'Ripgrep is required but not found'
     end
@@ -191,75 +165,22 @@ function __notes_by_tags
         echo 'FZF is required but not found'
     end
 
-    # Gather all tags and make them sorted and unique
-    set -l tags (__notes_list_tags | string collect)
-
-    # This stores **THE TAGS** that the user chose through FZF.  I don't know
-    # how to make the list of tags unique if I do "rg '.*'".  The advantage of
-    # using rg is that I get the filenames too, and can then hide them in FZF
-    # with "with-nth". Alternatively I can let the user perform tag search
-    # with FZF, and then just run the search again with those tags. As long as
-    # the end result is the same as what was offered in the FZF preview window,
-    # it should be fine.
-    set -l tags (                                  \
-         echo $tags | fzf                             \
-                --preview $__tags_preview_func_string \
-                --multi                               \
-                --preview-window down:wrap            \
-    )
-
-    set -l tag_results $FISH_NOTES_DIR/*/tags
-
-    for tag in $tags
-        set tag_results (rg --files-with-matches $tag $tag_results)
-    end
-
-    for v in $tag_results
-        set -l dir (dirname $v)
-        echo $dir/title
-        echo $dir/date
-        echo $dir/tags
-        echo $dir/body*
-    end
-end
-
-function __notes_by_content
-    if not type -q rg
-        echo 'Ripgrep is required but not found'
-    end
-
-    if not type -q fzf
-        echo 'FZF is required but not found'
-    end
-
-    set -l result (\
-        rg '.*' $FISH_NOTES_DIR/**/body.md          \
-            | sed '/:$/d'                           \
-            | fzf --height 70%                      \
-                --preview 'cat (dirname {1})/body*' \
-                --delimiter ':'                     \
-                --with-nth 2..                      \
-                --preview-window down:wrap)
-
-    if not test -n "$result"
-        return
-    end
-
-    set -l dir (dirname (string split ":" $result)[1])
-    echo $dir/title
-    echo $dir/date
-    echo $dir/tags
-    echo $dir/body*
+    # 1. Pipe all lines with ripgrep into fzf
+    # 2. Preview only the body (note content)
+    # 3. Result will be path/to/file:matched term -> split it and keep only first
+    # 4. Echo the directory name
+    rg '.*' $FISH_NOTES_DIR\
+        | fzf --preview 'cat (dirname {1})/body*' --delimiter ':' --with-nth '2..'\
+        | string split ':'\
+        | head -n 1 |\
+        read -l foo; echo (dirname $foo)
 end
 
 function __notes_help
     echo 'Usage:'
     echo 'notes help/--help/-h     Show this help'
     echo ''
-    echo 'notes search_tags        Search through notes by tags'
-    echo '                         Requires ripgrep and FZF'
-    echo ''
-    echo 'notes search_content     Search through notes by their content'
+    echo 'notes search             Find a single note based on all its content (title, tags, body, date)'
     echo '                         Requires ripgrep and FZF'
     echo ''
     echo 'notes new                Create a new note'
