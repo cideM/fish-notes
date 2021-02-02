@@ -20,14 +20,9 @@ function __notes_entry_template
 end)
 
 # Takes a date string and formats it in a way which can be used for 
-# lexicographic sorting. Works with BSD and GNU date.
+# lexicographic sorting.
 function __notes_date_lexicographic
-    # This kinda sorta detects if we're dealing with GNU or BSD date
-    if date --version >/dev/null 2>&1
-        echo (date -d $argv[1] +$__notes_date_format)
-    else
-        echo (date -j -f "%a %b %d %T %Z %Y" $argv[1] +$__notes_date_format)
-    end
+    echo (date -d $argv[1] +$__notes_date_format)
 end
 
 function __notes_dir_name
