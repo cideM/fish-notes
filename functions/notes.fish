@@ -148,40 +148,15 @@ function notes -a cmd -d "Fish Notes"
         case new
             set -e argv[1]
             __notes_new $argv
-        case search
-            __search
         case \*
             set -e argv[1]
             __notes_help
     end
 end
 
-function __search
-    if not type -q rg
-        echo 'Ripgrep is required but not found'
-    end
-
-    if not type -q fzf
-        echo 'FZF is required but not found'
-    end
-
-    # 1. Pipe all lines with ripgrep into fzf
-    # 2. Preview only the body (note content)
-    # 3. Result will be path/to/file:matched term -> split it and keep only first
-    # 4. Echo the directory name
-    rg '.*' $FISH_NOTES_DIR\
-        | fzf --preview 'cat (dirname {1})/body*' --delimiter ':' --with-nth '2..'\
-        | string split ':'\
-        | head -n 1 |\
-        read -l foo; echo (dirname $foo)
-end
-
 function __notes_help
     echo 'Usage:'
     echo 'notes help/--help/-h     Show this help'
-    echo ''
-    echo 'notes search             Find a single note based on all its content (title, tags, body, date)'
-    echo '                         Requires ripgrep and FZF'
     echo ''
     echo 'notes new                Create a new note'
     echo '      -t/--tag   TAG     Can be passed multiple times'
