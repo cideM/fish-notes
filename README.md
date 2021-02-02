@@ -27,7 +27,7 @@
 ```text
 $ set -x FISH_NOTES_DIR ~/.local/share/fish_notes
 $ notes new -T "This is a title" -t these -t are -t tags
-Created new note '/home/tifa/.local/share/fish_notes/616627'
+Created new note '/home/tifa/.local/share/fish_notes/2021-02-03T23:13:27+01:00'
 ```
 
 Your notes will be stored like this:
@@ -35,12 +35,12 @@ Your notes will be stored like this:
 ```
 fish_notes λ tree
 .
-├── 146261
+├── 2021-02-03T23:13:27+01:00
 │   ├── body.md
 │   ├── date
 │   ├── tags
 │   └── title
-├── 188152
+├── 2021-02-02T23:13:27+01:00
 │   ├── body.md
 │   ├── date
 │   ├── tags
@@ -49,7 +49,19 @@ fish_notes λ tree
 
 ### Searching
 
-This is currently a work in progress
+This script focuses almost entirely on creating notes, because searching notes is extremely dependent on what you're trying to accomplish.
+
+It's likely that I'll add some search functionality to Fish Notes again, to make certain tasks easier that would otherwise require hairy scripting.
+
+Anyway, here are some ideas for how you can search your notes!
+
+#### By Date
+
+Since the folder name of your notes use ISO 8601 they are automatically sorted. If you want to only operate on notes of a certain year, just do `ls $FISH_NOTES_DIR/2021-*`. For limiting it to certain months and years, you can use bracket expansion: `ls $FISH_NOTES_DIR/{2021,2022}-{2,3}*`. This will use the cartesian product or, in simpler words, find notes for both years and both months.
+
+#### By Content Interactively
+
+Please see `./contrib/find_one_note.fish` for a tiny script using ripgrep and FZF to find a sinlge note Interactively.
 
 ## Options
 

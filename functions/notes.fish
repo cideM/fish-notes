@@ -8,26 +8,12 @@ set -q FISH_NOTES_EXTENSION; or set FISH_NOTES_EXTENSION ".md"
 set -q TMPDIR; or set TMPDIR "/tmp"
 set -g fish_notes_version 0.0.1
 
-# Date format which can be sorted lexicographicically Means you can 
-# sort dates by their character value. 2020 > 2019 then month 05 > 04, 
-# and so on
-set __notes_date_format "%Y-%m-%d %T"
 
 set -q __notes_entry_template
 or set __notes_entry_template (\
 function __notes_entry_template
     echo ""
 end)
-
-# Takes a date string and formats it in a way which can be used for 
-# lexicographic sorting.
-function __notes_date_lexicographic
-    echo (date -d $argv[1] +$__notes_date_format)
-end
-
-function __notes_dir_name
-    echo $FISH_NOTES_DIR/(random 100000 1000000)
-end
 
 function __notes_new
     if not set -q EDITOR
@@ -56,7 +42,9 @@ function __notes_new
         return 1
     end
 
-    set -l entry_dir (__notes_dir_name)
+    # Use ISO 8601 so folders are automatically easy to sort
+    # lexicographicically and therefore by date 
+    set -l entry_dir $FISH_NOTES_DIR/(date -Iseconds)
 
     if test -d $entry_dir
         echo "$entry_dir already exists!"
@@ -102,8 +90,10 @@ function __notes_new
         touch "$entry_dir"/tags
     end
 
-    # Store date
-    __notes_date_lexicographic (date) >$entry_dir/date
+    # Store date in a format which can be sorted lexicographicically Means you can 
+    # sort dates by their character value. 2020 > 2019 then month 05 > 04, 
+    # and so on
+    date -Iseconds >$entry_dir/date
 
     # Store post
     cat "$tmpfile"  >"$entry_dir"/body$FISH_NOTES_EXTENSION
