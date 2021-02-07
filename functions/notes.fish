@@ -56,17 +56,18 @@ function __notes_new
     end
     mkdir -p "$entry_dir"
 
-    set -l template (__notes_entry_template | string collect)
+    set -l template (echo $__notes_entry_template | string collect)
 
     set -l tmpfile (mktemp $TMPDIR/"fish_notes_XXXX"$FISH_NOTES_EXTENSION)
-    echo $template >"$tmpfile"
+    echo $template | string join \n >"$tmpfile"
 
     # Ask user for note
     $EDITOR "$tmpfile"
 
+    set -l content (cat $tmpfile)
     # Check if files are different, meaning, check
     # if user actually made any changes to the template
-    if test (cat $tmpfile | string collect) = "$template"
+    if test "$content" = "$template"
         echo "You didn't change the default template, so I'll delete the entry again"
         rm -r $entry_dir
         return 0
