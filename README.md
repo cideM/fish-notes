@@ -5,6 +5,10 @@
 * [CHANGELOG](#changelog)
 * [Usage](#usage)
     * [Create Note](#create-note)
+    * [Searching](#searching)
+        * [Built-in: Tags and Title Search](#built-in-tags-and-title-search)
+        * [Custom: By Date](#custom-by-date)
+        * [Custom: By Content Interactively](#custom-by-content-interactively)
 * [Options](#options)
 * [Disclaimer](#disclaimer)
 
@@ -55,11 +59,24 @@ It's likely that I'll add some search functionality to Fish Notes again, to make
 
 Anyway, here are some ideas for how you can search your notes!
 
-#### By Date
+#### Built-in: Tags and Title Search
+
+You can search by tag(s) and title like this: `notes search -t tag1 -t tag2 -T
+"Some Title"`. Multiple tags will result in the intersection of all such
+results to be returned. What you get back are the folder names, so you can pipe them into other commands. Here's how to pipe the results into `less`
+
+```shell
+$ source functions/notes.fish; notes search -t agenda | xargs -I _ sh -c 'cat _/body*'
+# My first note!
+
+Content, more content
+```
+
+#### Custom: By Date
 
 Since the folder name of your notes use ISO 8601 they are automatically sorted. If you want to only operate on notes of a certain year, just do `ls $FISH_NOTES_DIR/2021-*`. For limiting it to certain months and years, you can use bracket expansion: `ls $FISH_NOTES_DIR/{2021,2022}-{2,3}*`. This will use the cartesian product or, in simpler words, find notes for both years and both months.
 
-#### By Content Interactively
+#### Custom: By Content Interactively
 
 Please see `./contrib/find_one_note.fish` for a tiny script using ripgrep and FZF to find a sinlge note Interactively.
 

@@ -102,6 +102,52 @@ function __notes_new
     echo "Created new note '$entry_dir'"
 end
 
+function __notes_search
+    set -l options \
+        (fish_opt -s t -l tags -r --multiple-vals) \
+        (fish_opt -s T -l title -r)
+    argparse -i $options -- $argv
+    if not argparse -i $options -- $argv
+        echo "failed to parse arguments" 1>&2
+        return 1
+    end
+
+    set -l results (for result in $FISH_NOTES_DIR/*/body*; dirname $result; end)
+    if test (count $results) -eq 0
+        echo "You don't have any notes!"
+        return 0
+    end
+
+    # For each category (tags, title), find all matches. Then return
+    # the intersection of the matches. That's how this search works in a
+    # nutshell and most of the code is plumbing and boilerplate since Fish
+    # (obviously) doesn't have set functions (union, intersection, etc). If
+    # a category is not defined, for example if the user did not supply
+    # tags to search, consider all files to match. So if we have one match
+    # for the given title, return the intersection of the title matches
+    # (one file) and the tag matches (all files).
+
+    if set -q _flag_t
+        for tag in $_flag_t
+            # Ignore "file not found" because if a post doesn't have a tags
+            # file then we can just ignore it. Same for title.
+            set results (grep -l "$tag" $results/tags 2> /dev/null | while read -la result
+                dirname $result
+            end)
+        end
+    end
+
+    if set -q _flag_T
+        set results (grep -l "$_flag_T" $results/title 2> /dev/null | while read -la result
+            dirname $result
+        end)
+    end
+
+    for f in (string join \n $results | sort -r)
+      echo $f
+    end
+end
+
 function __notes_list_tags
     cat $FISH_NOTES_DIR/*/tags \
     | sed '/^$/d'              \
@@ -134,6 +180,9 @@ function notes -a cmd -d "Fish Notes"
         case new
             set -e argv[1]
             __notes_new $argv
+        case search
+            set -e argv[1]
+            __notes_search $argv
         case \*
             set -e argv[1]
             __notes_help
@@ -148,6 +197,14 @@ function __notes_help
     echo '      -t/--tag   TAG     Can be passed multiple times'
     echo '                         Each passed value will be one tag of the new entry'
     echo '      -T/--title TITLE   Title for new note'
+    echo 'notes search             List notes (without options, list all entries)'
+    echo '        -t/--tags TAG    Can be passed multiple times'
+    echo '                         Show only entries which match all values passed as TAG'
+    echo '                         Show all entries matching foo AND bar'
+    echo '                         notes search -t foo -t bar'
+    echo '        -T/--title TITLE Show only entries whose title is contained in TITLE'
+    echo '                         Show all entries where title includes foo'
+    echo '                         notes search -T foo'
     echo ''
     echo 'Customziations:'
     echo 'You can customize the default template, meaning the text that will be'
